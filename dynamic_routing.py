@@ -1,11 +1,11 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-# Step 1: Create the network
+# Create the network
 network = nx.Graph()
 
-# Step 2: Connect the routers
-network.add_edges_from([
+# Connect routers
+connections = [
     ("A", "B"),
     ("A", "C"),
     ("B", "D"),
@@ -16,44 +16,110 @@ network.add_edges_from([
     ("E", "G"),
     ("F", "H"),
     ("G", "H")
-])
+]
 
-# Step 3: Find the original shortest path
+network.add_edges_from(connections)
+
+# Set router positions
+positions = nx.spring_layout(network, seed=42)
+
 source = "A"
 destination = "H"
 
-original_path = nx.shortest_path(network, source, destination)
+# Function to find shortest path
+def find_path(graph):
+    try:
+        path = nx.shortest_path(graph, source, destination)
+        print("Path:", " -> ".join(path))
+        return path
+    except (nx.NetworkXNoPath, nx.NodeNotFound):
+        print("No available path!")
+        return None
 
+
+# Function to draw network
+def draw_network(graph, path, title, filename, failed=None):
+
+    plt.figure(figsize=(9, 6))
+
+    # Draw working routers
+    nx.draw(
+        graph,
+        positions,
+        with_labels=True,
+        node_color="lightblue",
+        node_size=1200,
+        edge_color="gray"
+    )
+
+    # Highlight selected path
+    if path:
+        path_edges = list(zip(path, path[1:]))
+
+        nx.draw_networkx_edges(
+            graph,
+            positions,
+            edgelist=path_edges,
+            edge_color="green",
+            width=4
+        )
+
+    # Show failed router
+    if failed:
+        nx.draw_networkx_nodes(
+            network,
+            positions,
+            nodelist=[failed],
+            node_color="red",
+            node_shape="X",
+            node_size=1500
+        )
+
+        nx.draw_networkx_labels(
+            network,
+            positions,
+            labels={failed: failed}
+        )
+
+    plt.title(title)
+    plt.savefig(filename)
+    plt.close()
+
+
+# BEFORE FAILURE
 print("BEFORE FAILURE")
-print("Original Path:", original_path)
 
-# Step 4: Simulate router failure
+original_path = find_path(network)
+
+draw_network(
+    network,
+    original_path,
+    "Network Before Failure",
+    "before_failure.png"
+)
+
+
+# SIMULATE FAILURE
 failed_router = "D"
-network.remove_node(failed_router)
+
+faulty_network = network.copy()
+faulty_network.remove_node(failed_router)
 
 print("\nRouter D has failed!")
 
-# Step 5: Find a new path
+
+# AFTER FAILURE
 print("\nAFTER FAILURE")
 
-try:
-    new_path = nx.shortest_path(network, source, destination)
-    print("New Path:", new_path)
-    print("Network successfully rerouted!")
+new_path = find_path(faulty_network)
 
-except nx.NetworkXNoPath:
-    print("No available path!")
-
-# Step 6: Draw the network
-nx.draw(
-    network,
-    with_labels=True,
-    node_color="lightblue",
-    node_size=1500,
-    edge_color="gray"
+draw_network(
+    faulty_network,
+    new_path,
+    "Network After Failure",
+    "after_failure.png",
+    failed_router
 )
 
-plt.title("Network After Router Failure")
-plt.savefig("network_after_failure.png")
 
-print("\nNetwork diagram saved!")
+print("\nSimulation completed!")
