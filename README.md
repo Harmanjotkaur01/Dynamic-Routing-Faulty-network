@@ -13,8 +13,6 @@ sudo apt install python3
 ### MACOS SETUP
 
 macOS
-Click "Finder" -> Click "Applications" -> Click "Utilities" -> Click "Terminal"
-
 
 Step 1: Go to your application folder -> Utilities -> Terminal
 
