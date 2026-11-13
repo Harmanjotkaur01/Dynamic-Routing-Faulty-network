@@ -1,3 +1,29 @@
+### WINDOWS SETUP
+
+Step 1: Install python3
+
+Step 2: 
+
+### LINUX SETUP
+
+Linux: Step 1: Go to the terminal Step 2: run this command
+
+sudo apt install python3
+
+### MACOS SETUP
+
+macOS
+
+Step 1: Go to your application folder -> Utilities -> Terminal
+
+Step 2: Type "python3" into the terminal
+
+Step 3: Download the Google Colab file as a .py file
+
+Step 4: Type this in the terminal:
+
+"python3 energy_efficient_dynamic_routing.py"
+
 # Dynamic-Routing Mechanism Design in a Faulty Network
 
 ## Network Diagrams
