@@ -13,16 +13,20 @@ sudo apt install python3
 ### MACOS SETUP
 
 macOS
+Click "Finder" -> Click "Applications" -> Click "Utilities" -> Click "Terminal"
+
 
 Step 1: Go to your application folder -> Utilities -> Terminal
 
 Step 2: Type "python3" into the terminal
 
-Step 3: Download the Google Colab file as a .py file
+Step 3: Click "Finder" -> Click "Applications" -> Click "Utilities" -> Click "Terminal"
 
-Step 4: Type this in the terminal:
+Step 4: Go to the directory where the code is at:
+cd git
+cd dynamic-routing-faulty-network
 
-"python3 energy_efficient_dynamic_routing.py"
+Step 5: Type the following command: "python3 Dynamic-Routing-Faulty-network"
 
 # Dynamic-Routing Mechanism Design in a Faulty Network
 
