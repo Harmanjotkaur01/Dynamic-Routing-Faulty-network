@@ -1,125 +1,65 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import random
 
-# Create the network
+# Create network with individual attributes
 network = nx.Graph()
+network.add_node("A", failure_prob=0.0)
+network.add_node("B", failure_prob=0.15)
+network.add_node("C", failure_prob=0.10)
+network.add_node("D", failure_prob=0.25)
+network.add_node("E", failure_prob=0.20)
+network.add_node("F", failure_prob=0.10)
+network.add_node("G", failure_prob=0.05)
+network.add_node("H", failure_prob=0.0)
 
-# Connect routers
-connections = [
-    ("A", "B"),
-    ("A", "C"),
-    ("B", "D"),
-    ("C", "D"),
-    ("C", "E"),
-    ("D", "F"),
-    ("E", "F"),
-    ("E", "G"),
-    ("F", "H"),
-    ("G", "H")
-]
+network.add_edge("A", "B", failure_prob=0.05)
+network.add_edge("A", "C", failure_prob=0.10)
+network.add_edge("B", "D", failure_prob=0.15)
+network.add_edge("C", "D", failure_prob=0.05)
+network.add_edge("C", "E", failure_prob=0.10)
+network.add_edge("D", "F", failure_prob=0.20)
+network.add_edge("E", "F", failure_prob=0.10)
+network.add_edge("E", "G", failure_prob=0.05)
+network.add_edge("F", "H", failure_prob=0.15)
+network.add_edge("G", "H", failure_prob=0.05)
 
-network.add_edges_from(connections)
-
-# Set router positions
 positions = nx.spring_layout(network, seed=42)
-
 source = "A"
 destination = "H"
 
-# Function to find shortest path
-def find_path(graph):
+def find_path(graph, label):
+    print(f"\n--- {label} ---")
     try:
         path = nx.shortest_path(graph, source, destination)
-        print("Path:", " -> ".join(path))
+        print("Path found:", " -> ".join(path))
         return path
     except (nx.NetworkXNoPath, nx.NodeNotFound):
-        print("No available path!")
+        print("No available path due to network failures!")
         return None
 
+# 1. Baseline: Before Failure
+initial_path = find_path(network, "BEFORE FAILURE")
 
-# Function to draw network
-def draw_network(graph, path, title, filename, failed=None):
-
-    plt.figure(figsize=(9, 6))
-
-    # Draw working routers
-    nx.draw(
-        graph,
-        positions,
-        with_labels=True,
-        node_color="lightblue",
-        node_size=1200,
-        edge_color="gray"
-    )
-
-    # Highlight selected path
-    if path:
-        path_edges = list(zip(path, path[1:]))
-
-        nx.draw_networkx_edges(
-            graph,
-            positions,
-            edgelist=path_edges,
-            edge_color="green",
-            width=4
-        )
-
-    # Show failed router
-    if failed:
-        nx.draw_networkx_nodes(
-            network,
-            positions,
-            nodelist=[failed],
-            node_color="red",
-            node_shape="X",
-            node_size=1500
-        )
-
-        nx.draw_networkx_labels(
-            network,
-            positions,
-            labels={failed: failed}
-        )
-
-    plt.title(title)
-    plt.savefig(filename)
-    plt.close()
-
-
-# BEFORE FAILURE
-print("BEFORE FAILURE")
-
-original_path = find_path(network)
-
-draw_network(
-    network,
-    original_path,
-    "Network Before Failure",
-    "before_failure.png"
-)
-
-
-# SIMULATE FAILURE
-failed_router = "D"
-
+# 2. Dynamic Failure Simulation (Replacing hardcoded node D)
 faulty_network = network.copy()
-faulty_network.remove_node(failed_router)
+failed_components = []
 
-print("\nRouter D has failed!")
+# Evaluate node failures dynamically
+for router, data in list(faulty_network.nodes(data=True)):
+    if router not in [source, destination]:
+        if random.random() < data["failure_prob"]:
+            faulty_network.remove_node(router)
+            failed_components.append(router)
 
+# Evaluate link failures dynamically
+for u, v, data in list(faulty_network.edges(data=True)):
+    if u in faulty_network and v in faulty_network:
+        if random.random() < data["failure_prob"]:
+            faulty_network.remove_edge(u, v)
+            failed_components.append(f"Link({u},{v})")
 
-# AFTER FAILURE
-print("\nAFTER FAILURE")
+print("Failures detected at runtime:", failed_components)
 
-new_path = find_path(faulty_network)
-
-draw_network(
-    faulty_network,
-    new_path,
-    "Network After Failure",
-    "after_failure.png",
-    failed_router
-)
-
-
-print("\nSimulation completed!")
+# 3. Adaptive Routing: Recalculate path on the dynamically damaged network
+adapted_path = find_path(faulty_network, "AFTER DYNAMIC FAILURE & ADAPTATION")
